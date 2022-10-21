@@ -1,0 +1,24 @@
+<h1>Projects</h1>
+<nav>
+	{{#if isLoggedIn}}
+    <a href="/projects/create"> <input type="submit" value="Create Project"> </a>
+    {{/if}}	
+</nav>
+
+{{#if dbErrorOccurred}}
+    <p>Can't display the page now, try again later.</p>
+{{else}}
+    {{#if projects.length}}
+        <ul>
+            {{#each projects}}
+                <a class="project-title" href="/projects/{{id}}"> 
+                    {{title}}<br>
+                </a>
+                   {{description}} <br> <br>
+            {{/each}}
+        </ul>
+
+    {{else}}
+        <p> Projects will be created soon!</p>
+    {{/if}}
+{{/if}}

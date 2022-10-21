@@ -1,0 +1,19 @@
+<h1>Comment</h1>
+{{#if comment}}
+	<h5>{{comment.commentId}}</h5>
+
+Project Title: <em>{{comment.projectTitle}}</em>  <br> <br>
+<p> Comment: {{comment.comment}}</p> <br><br>
+User Name: <em>{{comment.username}}</em> <br> <br> 
+
+	{{#if isLoggedIn}}	
+		<a href="/comments/update/{{comment.id}}">   <input type="submit" value="Update"></a>
+		<form action="/comments/delete/{{comment.id}}" method="POST" style="display: inline;">
+			<input type="submit" value="Delete">
+		</form>
+	{{/if}}
+	<a href="/comments/create"> <input type="submit" value="Add Comment"> </a>
+	
+{{else}}
+	<p>No comment with that title exists.</p>
+{{/if}}

@@ -1,0 +1,24 @@
+<h1>Create Comment</h1>
+
+{{#if errors.length}}
+    <ul>
+      {{#each errors}}
+        <li class="error-message"> {{this}} </li>
+      {{/each}}
+    </ul>
+{{/if}}
+<form action="" method="POST">
+	<div class="form-group">
+		<label for="username"></label>
+		<input type="text" id="username" name="username" placeholder="Username" class="form-control" >
+	</div>
+	<div>
+		<label for="projectTitle"></label>
+		<input type="text" id="projectTitle" name="projectTitle" placeholder="Project Title" class="form-control">
+	</div> <br>
+	<div>
+		<label for="comment"></label>
+		<textarea rows = "8" cols = "130" id="comment" placeholder="Enter Comment" name = "comment"></textarea>
+	</div>
+	<input type="submit" class="btn btn-primary" value="Send Comment">
+</form>

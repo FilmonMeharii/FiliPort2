@@ -1,0 +1,26 @@
+<h1>Update Contact</h1>
+
+{{#if errors.length}}
+    <ul>
+      {{#each errors}}
+        <li class="error-message"> {{this}} </li>
+      {{/each}}
+    </ul>
+{{/if}}
+<form action="" method="POST">
+    <div>
+        Name: <input type="text" name="name" value=" {{contact.name}} ">
+    </div>
+    <div>
+        Email: <input type="text" name="email" value="{{contact.email}}">
+    </div> 
+    <div>
+        Phone Number: <input type="number" name="phoneNo" value="{{contact.phoneNo}}">
+    </div>
+    <div>
+        Adress: <input type="text" name="adress" value="{{contact.adress}}">
+    </div>
+    <input type="submit" value="Update Contact">
+</form>
+
+

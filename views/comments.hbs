@@ -1,0 +1,22 @@
+
+<h1>All Comments</h1>
+
+{{#if dbErrorOccurred}}
+	<p>Can't display the page now, please try again later.</p>
+{{else}}
+	{{#if comments.length}}
+		<ul>
+			{{#each comments}}
+				<a href="/comments/{{id}}">
+					<h5 style="display: inline;" >
+					<h4 class="project-title">{{projectTitle}} </h4> 
+				</a>
+					{{comment}} <br> <br> <br>
+					{{userName}}
+			{{/each}}
+		</ul>		
+	{{else}}
+		<p>There are no comments yet!>
+	{{/if}}	
+	<a href="/comments/create"> <input type="submit" value="Add Comment"> </a> <br><br>
+{{/if}}

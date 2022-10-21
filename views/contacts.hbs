@@ -1,0 +1,27 @@
+<h1>Contacts</h1>
+<nav>
+	{{#if isLoggedIn}}
+    <a href="contacts/create"><input type="submit" value=" Create contact"></a>
+    {{/if}}	
+</nav>
+
+{{#if dbErrorOccurred}}
+    <p>Can't display the page now, try again later.</p>
+{{else}}
+    {{#if contacts.length}}
+        <ul>
+            {{#each contacts}}
+            <a href="/contacts/{{id}}"> 
+                <ul class="project-title">  Name:- {{name}} </ul>
+                <ul> Email:- {{email}} </ul>
+            </a>
+          
+             {{/each}}
+        </ul>
+
+    {{else}}
+        <p>There is no contacts yet!</p>
+    {{/if}}
+
+{{/if}}
+

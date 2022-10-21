@@ -1,0 +1,30 @@
+<h1>Update Project</h1>
+
+{{#if errors.length}}
+    <ul>
+      {{#each errors}}
+        <li class="error-message"> {{this}} </li>
+      {{/each}}
+    </ul>
+{{/if}}
+
+{{#if isLoggedIn}}
+    <form action="" method="POST">
+        <div>
+            Title: <input type="text" name="title" value=" {{project.title}} ">
+        </div>
+        <div>
+            Description: <input type="text" name="description" value="{{project.description}}">
+        </div> 
+        <div>
+            Created Date: <input type="date" name="createdDate" value="{{project.createdDate}}">
+        </div>
+        <div>
+            Last Updated Date: <input type="date" name="lastUpdatedDate" value="{{project.lastUpdatedDate}}">
+        </div>
+
+        <input type="submit" value="Update Project">
+    </form>
+{{/if}}	
+
+

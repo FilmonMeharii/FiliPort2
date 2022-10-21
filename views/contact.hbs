@@ -1,0 +1,19 @@
+<h1>Contact</h1>
+{{#if contact}}
+    <p>
+        Name:- {{contact.name}} <br> 
+        Email:- {{contact.email}} <br> 
+        Phone Number:- {{contact.phoneNo}}<br> 
+        Adress:- {{contact.adress}} <br> <br>
+    </p>
+
+    {{#if isLoggedIn}}
+        <a href="/contacts/update/{{contact.id}}"> <input type="submit" value="Update"></a>
+        <form action="/contacts/delete/{{contact.id}}" method="POST" style="display: inline;">
+            <input type="submit" value="Delete">
+        </form>
+    {{/if}}
+    
+    {{else}}
+    <p>I will upload contacts soon</p>
+{{/if}}

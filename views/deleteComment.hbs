@@ -1,0 +1,17 @@
+<h1>Delete comment</h1>
+
+<form action="" method="POST">
+	<div class="form-group">
+		<label for="username">Username: </label>
+		<input type="text" id="username" name="username" class="form-control" value="{{comment.username}}">
+	</div>
+	<div>
+		<label for="projectTitle">Project Title: </label>
+		<input type="text" id="projectTitle" name="projectTitle" value="{{comment.projectTitle}}">>
+	</div> <br>
+	<div>
+	<label for="comment">Comment: </label>
+	<textarea rows = "8" cols = "130" id="comment" placeholder="Enter Comment" name = "comment"> {{comment.comment}} </textarea>
+	</div>
+	<button type="submit" class="btn btn-primary">Delete Comment</button>
+</form>

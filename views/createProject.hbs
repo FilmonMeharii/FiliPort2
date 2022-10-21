@@ -1,0 +1,21 @@
+<h1>Create project</h1>
+
+{{#if errors.length}}
+    <ul>
+      {{#each errors}}
+        <li class="error-message"> {{this}} </li>
+      {{/each}}
+    </ul>
+{{/if}}
+<form action="/projects/create" method="POST">
+    <div>
+        <input type="text" name="title" placeholder="Title">
+    </div>
+    <div>
+        <input type="text" name="description" placeholder="Description">
+    </div>
+    <div>
+        <input type="date" name="createdDate" placeholder="Created Date"> <br> <br>
+    </div>
+    <input type="submit" value="Create Project">
+</form>

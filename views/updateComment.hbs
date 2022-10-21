@@ -1,0 +1,25 @@
+<h1>Update Comment</h1>
+
+{{#if errors.length}}
+    <ul>
+      {{#each errors}}
+        <li class="error-message"> {{this}}</li>
+      {{/each}}
+    </ul>
+{{/if}}
+<form action="" method="POST">
+	<div class="form-group">
+		<label for="username">Username: </label>
+		<input type="text" id="username" name="username" value="{{comment.username}}" class="form-control">
+	</div>
+	<div>
+		<label for="projectTitle">Project Title: </label>
+		<input type="text" id="projectTitle" name="projectTitle" value="{{comment.projectTitle}}">
+	</div> <br>
+	<div>
+	<label for="comment">Comment: </label>
+	<textarea rows = "8" cols = "130" id="comment" placeholder="Enter Comment" name = "comment"> {{comment.comment}} </textarea>
+	</div>
+	<input type="submit" value="Update Comment" class="btn btn-primary">
+
+</form>

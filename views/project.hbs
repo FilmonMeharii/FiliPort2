@@ -1,0 +1,22 @@
+<h1>Project</h1>
+
+{{#if project}}        
+    <h2>{{project.title}} </h2>
+	<p>{{project.description}}</p> <br><br>
+   Created Date: <em>{{project.createdDate}}</em> <br>
+    {{#if project.lastUpdatedDate}}
+        Last Updated date :- {{project.lastUpdatedDate}}
+    {{/if}} <br> <br> <br>
+
+{{#if isLoggedIn}}
+    <a href="/projects/update/{{project.id}}"> <input type="submit" value="Update"></a>
+    <form action="/projects/delete/ {{project.id}}" method="POST" style="display:inline;">    
+        <input type="submit" value="Delete">
+    </form>
+{{/if}}
+<a href="/comments/create"> <input type="submit" value="Add Comment"></a>
+<a href="/comments"> <input type="submit" value="Read Comments"></a>
+
+{{else}}
+    <p>That project doesn't exist.</p>
+{{/if}}
