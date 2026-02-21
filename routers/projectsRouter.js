@@ -1,4 +1,5 @@
 const express = require('express')
+const { body, validationResult } = require('express-validator')
 const db = require('../db')
 
 const MIN_INPUT_LENGTH = 3
@@ -48,18 +49,20 @@ router.get("/", function(request, response){
 router.get("/create", requireLogin, function(request, response) {
     response.render("createProject.hbs")
 })
-router.post("/create", requireLogin, function(request, response) {
-    
-    const title = (request.body.title || '').trim()
-    const description = (request.body.description || '').trim()
-    const createdDate = (request.body.createdDate || '').trim()
-    const lastUpdatedDate = (request.body.lastUpdatedDate || '').trim()
-    
-    const errors = getProjectValidationErrors(title, description, createdDate, lastUpdatedDate)
-
-    if(errors.length > 0){
-        return response.render("createProject.hbs", { errors })
+router.post("/create", requireLogin,
+    body('title').trim().notEmpty().withMessage('Title is required').escape(),
+    body('description').trim().isLength({ min: MIN_INPUT_LENGTH }).withMessage('Description too short').escape(),
+    body('createdDate').trim().notEmpty().withMessage('Created date is required').escape(),
+    body('lastUpdatedDate').trim().notEmpty().withMessage('Last updated date is required').escape(),
+    function(request, response) {
+    const errorsArr = validationResult(request)
+    if (!errorsArr.isEmpty()) {
+        return response.render('createProject.hbs', { errors: errorsArr.array().map(e=>e.msg) })
     }
+    const title = request.body.title
+    const description = request.body.description
+    const createdDate = request.body.createdDate
+    const lastUpdatedDate = request.body.lastUpdatedDate
 
     db.createProject(title, description, createdDate, lastUpdatedDate, function(error, id){
         if(error){
@@ -84,22 +87,24 @@ router.get("/update/:id", requireLogin, function(request, response) {
     })
 })
 
-router.post("/update/:id", requireLogin, function(request, response){
+router.post("/update/:id", requireLogin,
+    body('title').trim().notEmpty().withMessage('Title is required').escape(),
+    body('description').trim().isLength({ min: MIN_INPUT_LENGTH }).withMessage('Description too short').escape(),
+    body('createdDate').trim().notEmpty().withMessage('Created date is required').escape(),
+    body('lastUpdatedDate').trim().notEmpty().withMessage('Last updated date is required').escape(),
+    function(request, response){
     const id = request.params.id
-    
-    const newTitle = (request.body.title || '').trim()
-    const newDescription = (request.body.description || '').trim()
-    const newCreatedDate = (request.body.createdDate || '').trim()
-    const newLastUpdatedDate = (request.body.lastUpdatedDate || '').trim()
-
-    const errors = getProjectValidationErrors(newTitle, newDescription, newCreatedDate, newLastUpdatedDate)
-
-    if(errors.length > 0){
+    const errorsArr = validationResult(request)
+    if (!errorsArr.isEmpty()) {
         return response.render("updateProject.hbs", {
-            errors,
-            project: { id, title: newTitle, description: newDescription, createdDate: newCreatedDate, lastUpdatedDate: newLastUpdatedDate }
+            errors: errorsArr.array().map(e=>e.msg),
+            project: { id, title: request.body.title, description: request.body.description, createdDate: request.body.createdDate, lastUpdatedDate: request.body.lastUpdatedDate }
         })
     }
+    const newTitle = request.body.title
+    const newDescription = request.body.description
+    const newCreatedDate = request.body.createdDate
+    const newLastUpdatedDate = request.body.lastUpdatedDate
 
     db.updateProjectById(id, newTitle, newDescription, newCreatedDate, newLastUpdatedDate, function(error){
         if(error){

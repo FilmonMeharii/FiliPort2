@@ -31,6 +31,47 @@ db.run(`
     )
 `)
 
+// user management
+const bcrypt = require('bcrypt')
+
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME
+const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH
+
+// ensure users table exists
+db.run(`
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE,
+        passwordHash TEXT
+    )
+`)
+
+// seed an admin user if provided via env and not already present
+if (ADMIN_USERNAME && ADMIN_PASSWORD_HASH) {
+    db.get("SELECT * FROM users WHERE username = ?", [ADMIN_USERNAME], function(err, user) {
+        if (!err && !user) {
+            db.run("INSERT INTO users (username, passwordHash) VALUES (?, ?)", [ADMIN_USERNAME, ADMIN_PASSWORD_HASH])
+        }
+    })
+}
+
+
+/*----------------------------------User-----------------------------------------*/
+
+exports.getUserByUsername = function(username, callback) {
+    const query = "SELECT * FROM users WHERE username = ?"
+    db.get(query, [username], function(error, user) {
+        callback(error, user)
+    })
+}
+
+exports.createUser = function(username, passwordHash, callback) {
+    const query = "INSERT INTO users (username, passwordHash) VALUES (?, ?)"
+    db.run(query, [username, passwordHash], function(error) {
+        callback(error, this.lastID)
+    })
+}
+
 
 /*----------------------------------Project-----------------------------------------*/
 

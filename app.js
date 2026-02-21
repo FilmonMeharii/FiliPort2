@@ -9,23 +9,22 @@ const bcrypt = require('bcrypt')
 const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
 const csurf = require('csurf')
+const morgan = require('morgan')
 
 const commentsRouter = require('./routers/commentsRouter')
 const projectsRouter = require('./routers/projectsRouter')
 const contactsRouter = require('./routers/contactsRouter')
+const db = require('./db') // for authentication
 
-// secrets and credentials must be supplied via environment variables
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME
-const ADMIN_PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH
-
-// session secret is also required; we won't fall back to a hard‑coded value
+// session secret is required; user data lives in the database
 const SESSION_SECRET = process.env.SESSION_SECRET
 
-if (!ADMIN_USERNAME || !ADMIN_PASSWORD_HASH || !SESSION_SECRET) {
-    console.error('ERROR: you must set ADMIN_USERNAME, ADMIN_PASSWORD_HASH and SESSION_SECRET in your environment')
+if (!SESSION_SECRET) {
+    console.error('ERROR: you must set SESSION_SECRET in your environment')
     process.exit(1)
 }
-// NOTE: never commit your .env file or plain text credentials
+// NOTE: user records (including the initial admin) are stored in the SQLite database
+// Set ADMIN_USERNAME and ADMIN_PASSWORD_HASH in .env before first run to seed the admin user.
 
 const app = express()
 // if running behind a proxy (e.g. Heroku, nginx) enable trust proxy for secure cookies
@@ -37,6 +36,9 @@ app.engine('hbs', expressHandlebars.engine({
 
 // security headers
 app.use(helmet())
+
+// logging
+app.use(morgan('combined'))
 
 // rate limiter for sensitive endpoints
 const loginLimiter = rateLimit({
@@ -72,7 +74,8 @@ app.use(function(err, req, res, next) {
         // token missing or invalid
         res.status(403).send('Form tampered with')
     } else {
-        next(err)
+        console.error(err.stack)
+        res.status(500).send('Internal Server Error')
     }
 })
 
@@ -80,7 +83,10 @@ app.use(express.static('public'))
 
 app.use("/comments", commentsRouter)
 app.use("/projects", projectsRouter)
-app.use("/contacts", contactsRouter) 
+app.use("/contacts", contactsRouter)
+
+const usersRouter = require('./routers/usersRouter')
+app.use('/users', usersRouter) 
 
 function getLogInValidationErrors(username, password){
     const validationErrors = []
@@ -111,18 +117,30 @@ app.post("/login", loginLimiter, function(request, response){
     const errors = getLogInValidationErrors(username, password)
 
     if(errors.length === 0) {
-        bcrypt.compare(password, ADMIN_PASSWORD_HASH, (error, isPasswordCorrect) => {
-            if(error) {
+        // fetch user from database
+        db.getUserByUsername(username, (err, user) => {
+            if(err) {
                 errors.push("An unexpected error occurred")
                 return response.render("login.hbs", { errors })
             }
-            if(isPasswordCorrect && username === ADMIN_USERNAME) {
-                request.session.isLoggedIn = true
-                return response.redirect("/")
+            if(user) {
+                bcrypt.compare(password, user.passwordHash, (error, match) => {
+                    if(error) {
+                        errors.push("An unexpected error occurred")
+                        return response.render("login.hbs", { errors })
+                    }
+                    if(match) {
+                        request.session.isLoggedIn = true
+                        return response.redirect("/")
+                    }
+                    errors.push("Invalid username or password")
+                    request.session.isLoggedIn = false
+                    response.render("login.hbs", { errors })
+                })
+            } else {
+                errors.push("Invalid username or password")
+                response.render("login.hbs", { errors })
             }
-            errors.push("Invalid username or password")
-            request.session.isLoggedIn = false
-            response.render("login.hbs", { errors })
         })
     } else {
         response.render("login.hbs", { errors })
@@ -139,9 +157,30 @@ app.get("/logout", function(request, response) {
 
 // remove development bcrypt/demo code
 
-// start server
+// start server when invoked directly (not required by tests)
 const port = process.env.PORT || 8080
-app.listen(port, () => {
-    console.log(`Server listening on port ${port}`)
-})
+
+function startServer() {
+    if (process.env.HTTPS_KEY && process.env.HTTPS_CERT) {
+        const https = require('https')
+        const fs = require('fs')
+        const options = {
+            key: fs.readFileSync(process.env.HTTPS_KEY),
+            cert: fs.readFileSync(process.env.HTTPS_CERT)
+        }
+        https.createServer(options, app).listen(port, () => {
+            console.log(`HTTPS server listening on port ${port}`)
+        })
+    } else {
+        app.listen(port, () => {
+            console.log(`HTTP server listening on port ${port}`)
+        })
+    }
+}
+
+if (require.main === module) {
+    startServer()
+}
+
+module.exports = app
 

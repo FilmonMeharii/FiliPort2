@@ -1,0 +1,20 @@
+<h1>Register</h1>
+
+{{#if errors.length}}
+    <ul>
+        {{#each errors}}
+            <li class="error-message">{{this}}</li>
+        {{/each}}
+    </ul>
+{{/if}}
+
+<form action="/users/register" method="POST">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+    <div>
+        Username: <input type="text" name="username">
+    </div>
+    <div>
+        Password: <input type="password" name="password">
+    </div>
+    <button type="submit">Register</button>
+</form>

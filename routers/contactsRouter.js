@@ -1,4 +1,5 @@
 const express = require('express')
+const { body, validationResult } = require('express-validator')
 const db = require('../db')
 
 
@@ -48,25 +49,28 @@ router.get("/", function(request, response) {
 router.get("/create", requireLogin, function(request, response) {
     response.render("createContact.hbs")
 })
-router.post("/create", requireLogin, function(request, response) {
-    
-    const name = (request.body.name || '').trim()
-    const email = (request.body.email || '').trim()
-    const phoneNo = (request.body.phoneNo || '').trim()
-    const adress = (request.body.adress || '').trim()
-    
-    const errors = getContactValidationErrors(name, email, phoneNo, adress)
-    if(errors.length > 0){
-        return response.render("createContact.hbs", { errors })
-    }
-    db.createContact(name, email, phoneNo, adress, function(error, id){
-        if(error){
-            const errs = ["Internal Error!", error]
-            return response.render("createContact.hbs", { errors: errs, dbErrorOccured: true })
+router.post("/create", requireLogin,
+    body('name').trim().notEmpty().withMessage('Name is required').escape(),
+    body('email').trim().isEmail().withMessage('Valid email required').normalizeEmail(),
+    body('phoneNo').trim().notEmpty().withMessage('Phone number required').escape(),
+    body('adress').trim().notEmpty().withMessage('Address required').escape(),
+    function(request, response) {
+        const errorsArr = validationResult(request)
+        if (!errorsArr.isEmpty()) {
+            return response.render("createContact.hbs", { errors: errorsArr.array().map(e=>e.msg) })
         }
-        response.redirect("/contacts")
+        const name = request.body.name
+        const email = request.body.email
+        const phoneNo = request.body.phoneNo
+        const adress = request.body.adress
+        db.createContact(name, email, phoneNo, adress, function(error, id){
+            if(error){
+                const errs = ["Internal Error!", error]
+                return response.render("createContact.hbs", { errors: errs, dbErrorOccured: true })
+            }
+            response.redirect("/contacts")
+        })
     })
-})
 router.get("/update/:id", requireLogin, function(request, response) {
     const id = request.params.id
     db.getContactById(id, function(error, contact) {
@@ -77,22 +81,25 @@ router.get("/update/:id", requireLogin, function(request, response) {
         response.render("updateContact.hbs", { contact, dbErrorOccured: false })
     })
 })
-router.post("/update/:id", requireLogin, function(request, response){
-
+router.post("/update/:id", requireLogin,
+    body('name').trim().notEmpty().withMessage('Name is required').escape(),
+    body('email').trim().isEmail().withMessage('Valid email required').normalizeEmail(),
+    body('phoneNo').trim().notEmpty().withMessage('Phone number required').escape(),
+    body('adress').trim().notEmpty().withMessage('Address required').escape(),
+    function(request, response){
     const id = request.params.id
-    
-    const newName = (request.body.name || '').trim()
-    const newEmail = (request.body.email || '').trim()
-    const newPhoneNo = (request.body.phoneNo || '').trim()
-    const newAdress = (request.body.adress || '').trim()
-
-    const errors = getContactValidationErrors(newName, newEmail, newPhoneNo, newAdress)
-    if(errors.length > 0){
+    const errorsArr = validationResult(request)
+    if (!errorsArr.isEmpty()) {
         return response.render("updateContact.hbs", {
-            errors,
-            contact: { id, name: newName, email: newEmail, phoneNo: newPhoneNo, adress: newAdress }
+            errors: errorsArr.array().map(e=>e.msg),
+            contact: { id, name: request.body.name, email: request.body.email, phoneNo: request.body.phoneNo, adress: request.body.adress }
         })
     }
+    const newName = request.body.name
+    const newEmail = request.body.email
+    const newPhoneNo = request.body.phoneNo
+    const newAdress = request.body.adress
+
     db.updateContactById(id, newName, newEmail, newPhoneNo, newAdress, function(error){
         if(error){
             const errs = ["Internal Error!", error]

@@ -1,6 +1,10 @@
 # Node modules
 node_modules/
 
+# Lockfiles (except package-lock.json which ensures reproducible installs)
+yarn.lock
+pnpm-lock.yaml
+
 # Editor settings
 .vscode/
 .idea/

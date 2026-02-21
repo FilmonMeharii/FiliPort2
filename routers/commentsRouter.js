@@ -1,4 +1,5 @@
 const express = require('express')
+const { body, validationResult } = require('express-validator')
 const db = require('../db')
 
 const MIN_INPUT_LENGTH = 4
@@ -42,24 +43,26 @@ router.get("/", function(request, response){
 router.get("/create", requireLogin, function(request, response) {
     response.render("createComment.hbs")
 })
-router.post("/create", requireLogin, function(request, response) {
-   
-    const username = (request.body.username || '').trim()
-    const projectTitle = (request.body.projectTitle || '').trim()
-    const comment = (request.body.comment || '').trim()
-
-    const errors = getCommentValidationErrors(username, projectTitle, comment)
-    if(errors.length > 0){
-        return response.render("createComment.hbs", { errors })
-    }
-    db.createComment(username, projectTitle, comment, function(error, id){
-        if(error){
-            const errs = ["Internal Error!", error]
-            return response.render("createComment.hbs", { errors: errs, dbErrorOccured: true })
+router.post("/create", requireLogin,
+    body('username').trim().notEmpty().withMessage('Username is required').escape(),
+    body('projectTitle').trim().notEmpty().withMessage('Project title is required').escape(),
+    body('comment').trim().isLength({ min: MIN_INPUT_LENGTH }).withMessage('Comment too short').escape(),
+    function(request, response) {
+        const errorsArr = validationResult(request)
+        if (!errorsArr.isEmpty()) {
+            return response.render("createComment.hbs", { errors: errorsArr.array().map(e=>e.msg) })
         }
-        response.redirect("/comments")
+        const username = request.body.username
+        const projectTitle = request.body.projectTitle
+        const comment = request.body.comment
+        db.createComment(username, projectTitle, comment, function(error, id){
+            if(error){
+                const errs = ["Internal Error!", error]
+                return response.render("createComment.hbs", { errors: errs, dbErrorOccured: true })
+            }
+            response.redirect("/comments")
+        })
     })
-})
 router.get("/update/:id", requireLogin, function(request, response) {
     const id = request.params.id
     const errors = []
@@ -71,20 +74,23 @@ router.get("/update/:id", requireLogin, function(request, response) {
         response.render("updateComment.hbs", { comment, dbErrorOccured: false })
     })
 })
-router.post("/update/:id", requireLogin, function(request, response){
+router.post("/update/:id", requireLogin,
+    body('username').trim().notEmpty().withMessage('Username is required').escape(),
+    body('projectTitle').trim().notEmpty().withMessage('Project title is required').escape(),
+    body('comment').trim().isLength({ min: MIN_INPUT_LENGTH }).withMessage('Comment too short').escape(),
+    function(request, response){
     const id = request.params.id
-
-    const projectTitle = (request.body.projectTitle || '').trim()
-    const newUsername = (request.body.username || '').trim()
-    const newComment = (request.body.comment || '').trim()
-
-    const errors = getCommentValidationErrors(newUsername, projectTitle, newComment)
-    if(errors.length > 0){
+    const errorsArr = validationResult(request)
+    if (!errorsArr.isEmpty()) {
         return response.render("updateComment.hbs", {
-            errors,
-            comment: { id, username: newUsername, comment: newComment, projectTitle }
+            errors: errorsArr.array().map(e=>e.msg),
+            comment: { id, username: request.body.username, comment: request.body.comment, projectTitle: request.body.projectTitle }
         })
     }
+    const projectTitle = request.body.projectTitle
+    const newUsername = request.body.username
+    const newComment = request.body.comment
+
     db.updateCommentById(id, newUsername, projectTitle, newComment, function(error){
         if(error){
             const errs = ["Internal Error!", error]
