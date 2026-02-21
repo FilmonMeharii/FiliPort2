@@ -5,13 +5,13 @@ const MIN_INPUT_LENGTH = 4
 
 function getCommentValidationErrors(username, projectTitle, comment){
     const validationErrors = []
-    if(comment.length < MIN_INPUT_LENGTH){
+    if(!comment || comment.trim().length < MIN_INPUT_LENGTH){
         validationErrors.push("Error: Comment must be at least "+MIN_INPUT_LENGTH+" characters!")
     }
-    if(username.length == 0){
+    if(!username || username.trim().length === 0){
         validationErrors.push("Error: Username can not be empty! Please insert a Username!")
     }
-    if(projectTitle.length == 0){
+    if(!projectTitle || projectTitle.trim().length === 0){
         validationErrors.push("Error: Project title can not be empty!")
     } 
     return validationErrors
@@ -39,121 +39,68 @@ router.get("/", function(request, response){
         }
     })
 })
-router.get("/create", function(request, response) {
+router.get("/create", requireLogin, function(request, response) {
     response.render("createComment.hbs")
 })
-router.post("/create", function(request, response) {
+router.post("/create", requireLogin, function(request, response) {
    
-    const username = request.body.username
-    const projectTitle = request.body.projectTitle
-    const comment = request.body.comment
+    const username = (request.body.username || '').trim()
+    const projectTitle = (request.body.projectTitle || '').trim()
+    const comment = (request.body.comment || '').trim()
 
     const errors = getCommentValidationErrors(username, projectTitle, comment)
-    if(0<errors.length){
-        const model = {errors}
-        response.render("createComment.hbs", model)
-        return
-    }else{
-        db.createComment(username, projectTitle, comment, function(error, id){
-            if(error){
-                errors.push("Internal Error!")
-                errors.push(error)
-                if(0<errors.length){
-                    const model = {errors}
-                    response.render("createComment.hbs", model)
-                    return
-                }
-                const model = {
-                    dbErrorOccured: true
-                }
-                response.render("createComment.hbs", model)
-            }else{
-                response.redirect("/comments")
-            }
-        })
+    if(errors.length > 0){
+        return response.render("createComment.hbs", { errors })
     }
+    db.createComment(username, projectTitle, comment, function(error, id){
+        if(error){
+            const errs = ["Internal Error!", error]
+            return response.render("createComment.hbs", { errors: errs, dbErrorOccured: true })
+        }
+        response.redirect("/comments")
+    })
 })
-router.get("/update/:id", function(request, response) {
+router.get("/update/:id", requireLogin, function(request, response) {
     const id = request.params.id
     const errors = []
-    if(!request.session.isLoggedIn){
-        errors.push("Error: You must log in first!")
-    }
     db.getCommentById(id, function(error, comment) {
         if(error){
-            errors.push("Internal Error: check connection to server!")
-            errors.push(error)
-            const model = {
-                errors,
-                dbErrorOccured: true
-            }
-            res.render("updateComment.hbs", model)
-        }else{
-            const model = {
-                comment,
-                dbErrorOccured: false
-            }
-            response.render("updateComment.hbs", model)
+            const errs = ["Internal Error: check connection to server!", error]
+            return response.render("updateComment.hbs", { errors: errs, dbErrorOccured: true })
         }
+        response.render("updateComment.hbs", { comment, dbErrorOccured: false })
     })
 })
-router.post("/update/:id", function(request, response){
+router.post("/update/:id", requireLogin, function(request, response){
     const id = request.params.id
 
-    const projectTitle = request.body.projectTitle
-    const newUsername = request.body.username
-    const newComment = request.body.comment
+    const projectTitle = (request.body.projectTitle || '').trim()
+    const newUsername = (request.body.username || '').trim()
+    const newComment = (request.body.comment || '').trim()
 
     const errors = getCommentValidationErrors(newUsername, projectTitle, newComment)
-    if(!request.session.isLoggedIn){
-        errors.push("Error:Log in first!")
+    if(errors.length > 0){
+        return response.render("updateComment.hbs", {
+            errors,
+            comment: { id, username: newUsername, comment: newComment, projectTitle }
+        })
     }
-    if(0<errors.length){
-        const model = {
-            errors, 
-            comment: {
-                id,
-                username: newUsername,
-                comment: newComment,
-                projectTitle: projectTitle
-            }
-        }
-    response.render("updateComment.hbs", model)
-    return
-    }
-    db.updateCommentById(newUsername, projectTitle, newComment, id, function(error){
+    db.updateCommentById(id, newUsername, projectTitle, newComment, function(error){
         if(error){
-            errors.push("Internal Error!")
-            errors.push(error)
-            const model = {
-                errors,
-                dbErrorOccured: true
-            }
-            response.render("updateComment.hbs", model)
-        }else{
-            response.redirect("/comments")
+            const errs = ["Internal Error!", error]
+            return response.render("updateComment.hbs", { errors: errs, dbErrorOccured: true })
         }
+        response.redirect("/comments")
     })
 })
-router.post("/delete/:id", function(request, response) {
+router.post("/delete/:id", requireLogin, function(request, response) {
     const id = request.params.id
-   
-    const errors = []
-    if(!request.session.isLoggedIn){
-        errors.push("Error: You must log in first!")
-    }
     db.deleteCommentById(id, function(error){
         if(error){
-            errors.push("Internal Error!")
-            errors.push(error)
-            const model = { 
-                errors,
-                dbErrorOccured: true
-            }
-            response.render("comment.hbs", model)
-        }else{
-            response.redirect("/comments")
+            const errs = ["Internal Error!", error]
+            return response.render("comment.hbs", { errors: errs, dbErrorOccured: true })
         }
+        response.redirect("/comments")
     })
 })
 router.get("/:id", function(request, response){
@@ -178,5 +125,13 @@ router.get("/:id", function(request, response){
         }
     })
 })
+
+// authentication helper
+function requireLogin(req, res, next) {
+    if (req.session && req.session.isLoggedIn) {
+        return next()
+    }
+    res.status(401).render('login.hbs', { errors: ['You must log in to access that page.'] })
+}
 
 module.exports = router

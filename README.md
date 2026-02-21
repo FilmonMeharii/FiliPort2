@@ -20,11 +20,23 @@ FiliPort2 is a Node.js web application for managing projects, contacts, and comm
    ```bash
    npm install
    ```
-2. Start the application:
+2. Configure environment variables (create a `.env` file in the project root). **These three are required and the server will refuse to start without them**:
+   ```env
+   ADMIN_USERNAME=yourAdmin
+   ADMIN_PASSWORD_HASH=<bcrypt hash of your password>
+   SESSION_SECRET=a long random string
+   ```
+   optionally you can set:
+   ```env
+   PORT=8080       # defaults to 8080 if unset
+   NODE_ENV=development
+   ```
+3. Install dependencies and start the application:
    ```bash
+   npm install
    npm start
    ```
-3. Visit `http://localhost:3000` in your browser.
+4. Visit `http://localhost:8080` in your browser.
 
 ## Scripts
 - `npm start`: Start the server

@@ -10,6 +10,7 @@
     {{#if isLoggedIn}}
         <a href="/contacts/update/{{contact.id}}"> <input type="submit" value="Update"></a>
         <form action="/contacts/delete/{{contact.id}}" method="POST" style="display: inline;">
+            <input type="hidden" name="_csrf" value="{{csrfToken}}">
             <input type="submit" value="Delete">
         </form>
     {{/if}}

@@ -10,6 +10,7 @@
 
 {{#if isLoggedIn}}
     <form action="" method="POST">
+        <input type="hidden" name="_csrf" value="{{csrfToken}}">
         <div>
             Title: <input type="text" name="title" value=" {{project.title}} ">
         </div>

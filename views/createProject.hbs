@@ -8,6 +8,7 @@
     </ul>
 {{/if}}
 <form action="/projects/create" method="POST">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
     <div>
         <input type="text" name="title" placeholder="Title">
     </div>

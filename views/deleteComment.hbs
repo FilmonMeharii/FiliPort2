@@ -1,6 +1,7 @@
 <h1>Delete comment</h1>
 
 <form action="" method="POST">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
 	<div class="form-group">
 		<label for="username">Username: </label>
 		<input type="text" id="username" name="username" class="form-control" value="{{comment.username}}">

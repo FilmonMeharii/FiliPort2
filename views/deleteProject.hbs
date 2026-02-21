@@ -1,6 +1,7 @@
 <h1>Delete Project</h1>
 
 <form action="/projects/delete" method="POST">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
     <div>
         Title: <input type="text" name="title" value=" {{title}}">
     </div>

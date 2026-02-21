@@ -14,10 +14,11 @@
     </ul>
 {{/if}}
 <form action="/login" method="post">
-	
-	<div>
-		Username: <input type="username" name="username">
-	</div>
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+    
+    <div>
+        Username: <input type="username" name="username">
+    </div>
 	
 	<div>
 		Password: <input type="password" name="password">

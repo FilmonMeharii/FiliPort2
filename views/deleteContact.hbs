@@ -1,6 +1,7 @@
 <h1>Delete Contact</h1>
 
 <form action="/contacts/delete" method="POST">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
     <div>
         Name: <input type="text" name="name" value=" {{name}} ">
     </div>

@@ -65,7 +65,8 @@ exports.getProjectById = function(id, callback) {
 
 exports.updateProjectById = function(id, title, description, createdDate, lastUpdatedDate, callback) {
     const query = "UPDATE projects SET title = ?, description = ?, createdDate = ?,  lastUpdatedDate= ?  WHERE id = ?"
-    const values = [id, title, description, createdDate, lastUpdatedDate]
+    // order of values must match placeholders: title, description, createdDate, lastUpdatedDate, id
+    const values = [title, description, createdDate, lastUpdatedDate, id]
     db.run(query, values, function(error) {
         callback(error)
     })
@@ -107,7 +108,8 @@ exports.getCommentById = function(id, callback) {
 exports.updateCommentById = function(id, username, projectTitle, comment, callback) {
 
     const query = "UPDATE comments SET username = ?, projectTitle = ?, comment = ? WHERE id = ?"
-    const values = [id, username, projectTitle, comment]
+    // values in same order as placeholders, id comes last
+    const values = [username, projectTitle, comment, id]
     db.run(query, values, function(error)  {
         callback(error)
     })
@@ -152,7 +154,8 @@ exports.getContactById = function(id, callback) {
 exports.updateContactById = function(id, name, email, phoneNo, adress, callback) {
 
     const query = "UPDATE contacts SET name = ?, email = ?, phoneNo = ?, adress = ? WHERE id = ?"
-    const values = [id, name, email, phoneNo, adress]
+    // values ordered to match placeholders, id at end
+    const values = [name, email, phoneNo, adress, id]
     db.run(query, values, function(error) {
         callback(error)
     })

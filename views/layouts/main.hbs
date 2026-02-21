@@ -26,6 +26,7 @@
 						<a href="/contacts">Contact</a></li>				
 						{{#if isLoggedIn}}
 						<form action="/logout" method="POST" class="form">
+							<input type="hidden" name="_csrf" value="{{csrfToken}}">
 							<input type="submit" value="Log Out">
 						</form>
 						{{else}}
@@ -45,6 +46,7 @@
 					<a href="/contacts">Contact</a></li>				
 					{{#if isLoggedIn}}
 					<form action="/logout" method="POST" class="form">
+						<input type="hidden" name="_csrf" value="{{csrfToken}}">
 						<input type="submit" value="Log out" class="item2">
 					</form> 
 					{{else}}

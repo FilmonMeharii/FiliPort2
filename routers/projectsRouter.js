@@ -3,19 +3,19 @@ const db = require('../db')
 
 const MIN_INPUT_LENGTH = 3
 
-function getProjectValidationErrors(createdDate, title, description, lastUpdatedDate){
+// validation helper keeps parameter order consistent with route handlers
+function getProjectValidationErrors(title, description, createdDate, lastUpdatedDate){
     const validationErrors = []
-    if(title.length == 0){
+    if(!title || title.trim().length === 0){
         validationErrors.push("Error:: Title can't be empty")
     }
-    if(description.length < MIN_INPUT_LENGTH){
-      validationErrors.push("Error:: Description must be at least "+MIN_INPUT_LENGTH+" words!")
+    if(!description || description.trim().length < MIN_INPUT_LENGTH){
+      validationErrors.push("Error:: Description must be at least "+MIN_INPUT_LENGTH+" characters!")
     }
-    
-    if(createdDate.length== ""){
+    if(!createdDate || createdDate.trim().length === 0){
         validationErrors.push("Error: Please enter the date you created the project!")
     }
-    if(lastUpdatedDate==""){
+    if(!lastUpdatedDate || lastUpdatedDate.trim().length === 0){
         validationErrors.push("Error, please enter the last date you updated the project!")
     }
    return validationErrors
@@ -45,47 +45,32 @@ router.get("/", function(request, response){
     })
 })
 
-router.get("/create", function(request, response) {
+router.get("/create", requireLogin, function(request, response) {
     response.render("createProject.hbs")
 })
-router.post("/create", function(request, response) {
+router.post("/create", requireLogin, function(request, response) {
     
-    const title = request.body.title
-    const description = request.body.description
-    const createdDate = request.body.createdDate
-    const lastUpdatedDate = request.bodylastUpdatedDate
+    const title = (request.body.title || '').trim()
+    const description = (request.body.description || '').trim()
+    const createdDate = (request.body.createdDate || '').trim()
+    const lastUpdatedDate = (request.body.lastUpdatedDate || '').trim()
     
     const errors = getProjectValidationErrors(title, description, createdDate, lastUpdatedDate)
 
-    if(!request.session.isLoggedIn){
-        errors.push("Must be logged in!")
+    if(errors.length > 0){
+        return response.render("createProject.hbs", { errors })
     }
-    if(0<errors.length){
-        const model = {errors}
-        response.render("createProject.hbs", model)
-        return
-    }else{
-        db.createProject(title,description,createdDate, lastUpdatedDate,function(error, id){
-            if(error){
-                errors.push("Error")
-                errors.push(error)
-                if(0<errors.length){
-                    const model ={errors}
-                    response.render("createProject.hbs", model)
-                    return
-                }
-                const model = { 
-                    dbErrorOccured: true
-                }
-                response.render("createProject.hbs", model)
-            }else{
-                response.redirect("/projects")
-            }
-        })
-    }
+
+    db.createProject(title, description, createdDate, lastUpdatedDate, function(error, id){
+        if(error){
+            const errs = ["Database error", error]
+            return response.render("createProject.hbs", { errors: errs, dbErrorOccured: true })
+        }
+        response.redirect("/projects")
+    })
 })
 
-router.get("/update/:id", function(request, response) {
+router.get("/update/:id", requireLogin, function(request, response) {
     const id = request.params.id
     const errors = []
 
@@ -93,81 +78,48 @@ router.get("/update/:id", function(request, response) {
         if(error){
             errors.push("Error")
             errors.push(error)
-            const model = { 
-                errors,
-                dbErrorOccured: true
-            }
-            response.render("updateProject.hbs", model)
-        }else{
-            const model = {
-                project,
-                dbErrorOccured: false
-            }
-            response.render("updateProject.hbs", model)
+            return response.render("updateProject.hbs", { errors, dbErrorOccured: true })
         }
+        response.render("updateProject.hbs", { project, dbErrorOccured: false })
     })
 })
 
-router.post("/update/:id", function(request, response){
+router.post("/update/:id", requireLogin, function(request, response){
     const id = request.params.id
     
-    const newTitle = request.body.title
-    const newDescription = request.body.description
-    const newCreatedDate = request.body.createdDate
-    const newLastUpdatedDate = request.body.lastUpdatedDate
+    const newTitle = (request.body.title || '').trim()
+    const newDescription = (request.body.description || '').trim()
+    const newCreatedDate = (request.body.createdDate || '').trim()
+    const newLastUpdatedDate = (request.body.lastUpdatedDate || '').trim()
 
     const errors = getProjectValidationErrors(newTitle, newDescription, newCreatedDate, newLastUpdatedDate)
 
-    if(!request.session.isLoggedIn){
-        errors.push("Errors:: You must log in first!")
+    if(errors.length > 0){
+        return response.render("updateProject.hbs", {
+            errors,
+            project: { id, title: newTitle, description: newDescription, createdDate: newCreatedDate, lastUpdatedDate: newLastUpdatedDate }
+        })
     }
-    if(0<errors.length){
-        const model = {
-            errors, 
-            project: {
-                id,
-                title: newTitle,
-                description: newDescription,
-                createdDate: newCreatedDate,
-                lastUpdatedDate: newLastUpdatedDate
 
-            }
-        }
-    response.render("updateProject.hbs", model)
-    return
-    }
-    db.updateProjectById(newTitle, newDescription, newCreatedDate, newLastUpdatedDate, id, function(error){
+    db.updateProjectById(id, newTitle, newDescription, newCreatedDate, newLastUpdatedDate, function(error){
         if(error){
-            errors.push("Error")
-            errors.push(error)
-            const model = { 
-                errors,
-                dbErrorOccured: true
-            }
-            response.render("updateProject.hbs", model)
-        }else{
-            response.redirect("/projects")
+            const errs = ["Database error", error]
+            return response.render("updateProject.hbs", { errors: errs, dbErrorOccured: true })
         }
+        response.redirect("/projects")
     })
 })
 
-router.post("/delete/:id", function(request, response) {
+router.post("/delete/:id", requireLogin, function(request, response) {
 
     const id = request.params.id
-
-    if(!request.session.isLoggedIn){
-        errors.push("Errors:: You must log in first!")
-    }
+    const errors = []
 
     db.deleteProjectById(id, function(error){
         if(error){
-            const model = { 
-                dbErrorOccured: true
-            }
-            response.render("project.hbs", model)
-        }else{
-            response.redirect("/projects")
+            return response.render("project.hbs", { errors: ["Database error", error], dbErrorOccured: true })
         }
+        response.redirect("/projects")
     })
 })
 
@@ -177,21 +129,18 @@ router.get("/:id", function(request, response){
     const errors =[]
     db.getProjectById(id, function(error, project){
         if(error){
-            errors.push("Error")
-            errors.push(error)
-            const model = { 
-                errors,
-                dbErrorOccured: true
-            }
-            response.render("project.hbs", model)
-        }else{
-            const model = {
-                project,
-                dbErrorOccured: false
-            }
-            response.render("project.hbs", model)
+            return response.render("project.hbs", { errors: ["Error", error], dbErrorOccured: true })
         }
+        response.render("project.hbs", { project, dbErrorOccured: false })
     })
 })
+
+// simple middleware used by several routes
+function requireLogin(req, res, next) {
+    if (req.session && req.session.isLoggedIn) {
+        return next()
+    }
+    res.status(401).render('login.hbs', { errors: ['You must be logged in to access that page.'] })
+}
 
 module.exports = router
