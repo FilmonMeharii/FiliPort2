@@ -1,18 +1,22 @@
-<h1>Delete comment</h1>
+<h1>Delete Comment</h1>
 
-<form action="" method="POST">
+<form action="" method="POST" class="container">
     <input type="hidden" name="_csrf" value="{{csrfToken}}">
-	<div class="form-group">
-		<label for="username">Username: </label>
-		<input type="text" id="username" name="username" class="form-control" value="{{comment.username}}">
-	</div>
-	<div>
-		<label for="projectTitle">Project Title: </label>
-		<input type="text" id="projectTitle" name="projectTitle" value="{{comment.projectTitle}}">>
-	</div> <br>
-	<div>
-	<label for="comment">Comment: </label>
-	<textarea rows = "8" cols = "130" id="comment" placeholder="Enter Comment" name = "comment"> {{comment.comment}} </textarea>
-	</div>
-	<button type="submit" class="btn btn-primary">Delete Comment</button>
+    
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" value="{{comment.username}}" disabled>
+    </div>
+    
+    <div class="form-group">
+        <label for="projectTitle">Project Title:</label>
+        <input type="text" id="projectTitle" name="projectTitle" value="{{comment.projectTitle}}" disabled>
+    </div>
+    
+    <div class="form-group">
+        <label for="comment">Comment:</label>
+        <textarea id="comment" name="comment" rows="4" disabled>{{comment.comment}}</textarea>
+    </div>
+    
+    <button type="submit" class="btn">Delete Comment</button>
 </form>

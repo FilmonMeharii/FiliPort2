@@ -3,28 +3,36 @@
 {{#if errors.length}}
     <ul>
       {{#each errors}}
-        <li class="error-message"> {{this}} </li>
+        <li class="error-message">{{this}}</li>
       {{/each}}
     </ul>
 {{/if}}
 
 {{#if isLoggedIn}}
-    <form action="" method="POST">
+    <form action="" method="POST" class="container">
         <input type="hidden" name="_csrf" value="{{csrfToken}}">
-        <div>
-            Title: <input type="text" name="title" value=" {{project.title}} ">
+        
+        <div class="form-group">
+            <label for="title">Title:</label>
+            <input type="text" id="title" name="title" value="{{project.title}}" required>
         </div>
-        <div>
-            Description: <input type="text" name="description" value="{{project.description}}">
+        
+        <div class="form-group">
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="4" required>{{project.description}}</textarea>
         </div> 
-        <div>
-            Created Date: <input type="date" name="createdDate" value="{{project.createdDate}}">
+        
+        <div class="form-group">
+            <label for="createdDate">Created Date:</label>
+            <input type="date" id="createdDate" name="createdDate" value="{{project.createdDate}}" required>
         </div>
-        <div>
-            Last Updated Date: <input type="date" name="lastUpdatedDate" value="{{project.lastUpdatedDate}}">
+        
+        <div class="form-group">
+            <label for="lastUpdatedDate">Last Updated Date:</label>
+            <input type="date" id="lastUpdatedDate" name="lastUpdatedDate" value="{{project.lastUpdatedDate}}" required>
         </div>
 
-        <input type="submit" value="Update Project">
+        <button type="submit" class="btn">Update Project</button>
     </form>
 {{/if}}	
 

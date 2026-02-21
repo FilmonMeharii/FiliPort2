@@ -7,23 +7,23 @@
 {{#if errors.length}}
     <ul>
       {{#each errors}}
-        <li class="error-message"> 
-			{{this}}
-		</li>
+        <li class="error-message">{{this}}</li>
       {{/each}}
     </ul>
 {{/if}}
-<form action="/login" method="post">
+
+<form action="/login" method="post" class="container">
     <input type="hidden" name="_csrf" value="{{csrfToken}}">
     
-    <div>
-        Username: <input type="username" name="username">
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
     </div>
 	
-	<div>
-		Password: <input type="password" name="password">
+	<div class="form-group">
+		<label for="password">Password:</label>
+		<input type="password" id="password" name="password" required>
 	</div>
 	
-	<input type="submit" value="Log in">
-	
+	<button type="submit" class="btn">Log In</button>
 </form>

@@ -1,13 +1,13 @@
-{
-  "testEnvironment": "node",
-  "testMatch": ["**/__tests__/**/*.test.js"],
-  "testTimeout": 15000,
-  "collectCoverageFrom": [
+module.exports = {
+  testEnvironment: "node",
+  testMatch: ["**/__tests__/**/*.test.js"],
+  testTimeout: 15000,
+  collectCoverageFrom: [
     "app.js",
     "db.js",
     "routers/**/*.js"
   ],
-  "coveragePathIgnorePatterns": [
+  coveragePathIgnorePatterns: [
     "/node_modules/"
   ]
-}
+};

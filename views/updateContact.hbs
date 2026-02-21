@@ -3,25 +3,35 @@
 {{#if errors.length}}
     <ul>
       {{#each errors}}
-        <li class="error-message"> {{this}} </li>
+        <li class="error-message">{{this}}</li>
       {{/each}}
     </ul>
 {{/if}}
-<form action="" method="POST">
+
+<form action="" method="POST" class="container">
     <input type="hidden" name="_csrf" value="{{csrfToken}}">
-    <div>
-        Name: <input type="text" name="name" value=" {{contact.name}} ">
+    
+    <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="{{contact.name}}" required>
     </div>
-    <div>
-        Email: <input type="text" name="email" value="{{contact.email}}">
+    
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" value="{{contact.email}}" required>
     </div> 
-    <div>
-        Phone Number: <input type="number" name="phoneNo" value="{{contact.phoneNo}}">
+    
+    <div class="form-group">
+        <label for="phoneNo">Phone Number:</label>
+        <input type="tel" id="phoneNo" name="phoneNo" value="{{contact.phoneNo}}" required>
     </div>
-    <div>
-        Adress: <input type="text" name="adress" value="{{contact.adress}}">
+    
+    <div class="form-group">
+        <label for="adress">Address:</label>
+        <input type="text" id="adress" name="adress" value="{{contact.adress}}" required>
     </div>
-    <input type="submit" value="Update Contact">
+    
+    <button type="submit" class="btn">Update Contact</button>
 </form>
 
 

@@ -8,13 +8,18 @@
     </ul>
 {{/if}}
 
-<form action="/users/register" method="POST">
+<form action="/users/register" method="POST" class="container">
     <input type="hidden" name="_csrf" value="{{csrfToken}}">
-    <div>
-        Username: <input type="text" name="username">
+    
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" minlength="3" required>
     </div>
-    <div>
-        Password: <input type="password" name="password">
+    
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" minlength="6" required>
     </div>
-    <button type="submit">Register</button>
+    
+    <button type="submit" class="btn">Register</button>
 </form>

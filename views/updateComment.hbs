@@ -3,24 +3,28 @@
 {{#if errors.length}}
     <ul>
       {{#each errors}}
-        <li class="error-message"> {{this}}</li>
+        <li class="error-message">{{this}}</li>
       {{/each}}
     </ul>
 {{/if}}
-<form action="" method="POST">
-    <input type="hidden" name="_csrf" value="{{csrfToken}}">
-	<div class="form-group">
-		<label for="username">Username: </label>
-		<input type="text" id="username" name="username" value="{{comment.username}}" class="form-control">
-	</div>
-	<div>
-		<label for="projectTitle">Project Title: </label>
-		<input type="text" id="projectTitle" name="projectTitle" value="{{comment.projectTitle}}">
-	</div> <br>
-	<div>
-	<label for="comment">Comment: </label>
-	<textarea rows = "8" cols = "130" id="comment" placeholder="Enter Comment" name = "comment"> {{comment.comment}} </textarea>
-	</div>
-	<input type="submit" value="Update Comment" class="btn btn-primary">
 
+<form action="" method="POST" class="container">
+    <input type="hidden" name="_csrf" value="{{csrfToken}}">
+    
+    <div class="form-group">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" value="{{comment.username}}" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="projectTitle">Project Title:</label>
+        <input type="text" id="projectTitle" name="projectTitle" value="{{comment.projectTitle}}" required>
+    </div>
+    
+    <div class="form-group">
+        <label for="comment">Comment:</label>
+        <textarea id="comment" name="comment" rows="4" minlength="4" required>{{comment.comment}}</textarea>
+    </div>
+    
+    <button type="submit" class="btn">Update Comment</button>
 </form>
